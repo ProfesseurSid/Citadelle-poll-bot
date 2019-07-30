@@ -1,5 +1,5 @@
-# Citadelle-poll-bot
-Attempt for a Citadelle bot managing polls
+# Citadel-poll-bot
+Attempt for a Citadel bot managing polls
 
 # Documentation source
 https://matrix.org/docs/spec/client_server/latest
@@ -7,7 +7,7 @@ https://matrix.org/docs/spec/client_server/latest
 # Basics
 ## Variables
 In the next examples, here are the needed env variables :
-- **$CITADELLE**: the Citadelle server's name or IP.
+- **$CITADELE**: the Citadel server's name or IP.
 - **$EMAIL**: the e-mail address for the account to be used by the bot.
 - **$PASSWORD**: the password for the account to be used by the bot.
 - **$DEVICE_ID**: the device ID for the device to be used by the bot.
