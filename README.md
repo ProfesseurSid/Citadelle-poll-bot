@@ -7,7 +7,7 @@ https://matrix.org/docs/spec/client_server/latest
 # Basics
 ## Variables
 In the next examples, here are the needed env variables :
-- **$CITADELE**: the Citadel server's name or IP.
+- **$CITADEL**: the Citadel server's name or IP.
 - **$EMAIL**: the e-mail address for the account to be used by the bot.
 - **$PASSWORD**: the password for the account to be used by the bot.
 - **$DEVICE_ID**: the device ID for the device to be used by the bot.
@@ -19,7 +19,7 @@ In the next examples, here are the needed env variables :
 - **$BATCH**: the batch from which to receive the events.
 
 ## Requesting the tokens
-**POST** https://$CITADELLE/_matrix/client/r0/login
+**POST** https://$CITADEL/_matrix/client/r0/login
 ```JSON
 {
   "type": "m.login.password",
@@ -34,11 +34,11 @@ In the next examples, here are the needed env variables :
 }
 ```
 ```SHELL
-curl.exe --request POST --url https://$CITADELLE/_matrix/client/r0/login --header 'cache-control: no-cache' --header 'content-type: application/json' --data "{\"type\":\"m.login.password\",\"identifier\":{\"type\":\"m.id.thirdparty\",\"medium\":\"email\",\"address\":\"$EMAIL\"},\"password\":\"$PASSWORD\",\"device_id\":\"$DEVICE_ID\",\"initial_device_display_name\":\"Poll's bot\"}"
+curl.exe --request POST --url https://$CITADEL/_matrix/client/r0/login --header 'cache-control: no-cache' --header 'content-type: application/json' --data "{\"type\":\"m.login.password\",\"identifier\":{\"type\":\"m.id.thirdparty\",\"medium\":\"email\",\"address\":\"$EMAIL\"},\"password\":\"$PASSWORD\",\"device_id\":\"$DEVICE_ID\",\"initial_device_display_name\":\"Poll's bot\"}"
 ```
 
 ## Sending a message
-**PUT** https://$CITADELLE/_matrix/client/r0/rooms/$ROOM_ID:$CITADELLE/send/m.room.message/$TRANSACTION_ID
+**PUT** https://$CITADEL/_matrix/client/r0/rooms/$ROOM_ID:$CITADEL/send/m.room.message/$TRANSACTION_ID
 ```JSON
 {
   "msgtype": "m.text",
@@ -46,13 +46,13 @@ curl.exe --request POST --url https://$CITADELLE/_matrix/client/r0/login --heade
 }
 ```
 ```SHELL
-curl --request PUT --url "https://$CITADELLE/_matrix/client/r0/rooms/$ROOM_ID:$CITADELLE/send/m.room.message/$TRANSACTION_ID" --header 'content-type: application/json' --header "authorization: Bearer $TKN" --data "{\"msgtype\": \"m.text\", \"body\": \"Test bot\"}"
+curl --request PUT --url "https://$CITADEL/_matrix/client/r0/rooms/$ROOM_ID:$CITADEL/send/m.room.message/$TRANSACTION_ID" --header 'content-type: application/json' --header "authorization: Bearer $TKN" --data "{\"msgtype\": \"m.text\", \"body\": \"Test bot\"}"
 ```
 
 ## Creating a filter
 *To get almost only $ROOM_ID room's messages*
 
-**POST** https://$CITADELLE/_matrix/client/r0/user/$USER_UNIC:$CITADELLE/filter
+**POST** https://$CITADEL/_matrix/client/r0/user/$USER_UNIC:$CITADEL/filter
 ```JSON
 {
   "presence": {
@@ -67,18 +67,18 @@ curl --request PUT --url "https://$CITADELLE/_matrix/client/r0/rooms/$ROOM_ID:$C
     "state": {
       "types": ["m.room.message"]
     },
-    "rooms": ["$ROOM_ID:$CITADELLE"]
+    "rooms": ["$ROOM_ID:$CITADEL"]
   }
 }
 ```
 ```SHELL
-curl.exe --request POST --url "https://$CITADELLE/_matrix/client/r0/user/$USER_UNIC:$CITADELLE/filter" --header 'content-type: application/json' --header "authorization: Bearer $TKN" --data "{\"presence\":{\"limit\":0,\"not_types\":[\"*\"]},\"account_data\":{\"limit\":0,\"not_types\":[\"*\"]},\"room\":{\"state\":{\"types\":[\"m.room.message\"]},\"rooms\":[\"$ROOM_ID:$CITADELLE\"]}}"
+curl.exe --request POST --url "https://$CITADEL/_matrix/client/r0/user/$USER_UNIC:$CITADEL/filter" --header 'content-type: application/json' --header "authorization: Bearer $TKN" --data "{\"presence\":{\"limit\":0,\"not_types\":[\"*\"]},\"account_data\":{\"limit\":0,\"not_types\":[\"*\"]},\"room\":{\"state\":{\"types\":[\"m.room.message\"]},\"rooms\":[\"$ROOM_ID:$CITADEL\"]}}"
 ```
 
 ## Synchronizing
 *After each call, $BATCH should take next_batch's value from the response*
 
-**GET** https://$CITADELLE/_matrix/client/r0/sync?filter=$FILTER&since=$BATCH&full_state=false&set_presence=offline&timeout=30000&access_token=$TKN
+**GET** https://$CITADEL/_matrix/client/r0/sync?filter=$FILTER&since=$BATCH&full_state=false&set_presence=offline&timeout=30000&access_token=$TKN
 ```SHELL
-curl.exe --request GET --url "https://$CITADELLE/_matrix/client/r0/sync?filter=$FILTER&since=$BATCH&full_state=false&set_presence=offline&timeout=30000&access_token=$TKN"
+curl.exe --request GET --url "https://$CITADEL/_matrix/client/r0/sync?filter=$FILTER&since=$BATCH&full_state=false&set_presence=offline&timeout=30000&access_token=$TKN"
 ```
