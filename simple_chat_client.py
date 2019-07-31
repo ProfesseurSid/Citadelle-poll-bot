@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import os
 import samples_common  # Common bits used between samples
 import logging
 import datetime
@@ -27,10 +28,10 @@ def on_message(room, event):
 def handle_alpsys_bot(room, msg, sender):
     cmd = msg.split()
     if len(cmd) <= 1:
-        display_help()
+        display_help(room)
     else:
         if cmd[1] == "help":
-            display_help()
+            display_help(room)
         elif cmd[1] == "date":
             room.send_text("Current server time: %s" % datetime.datetime.now())
         elif cmd[1] == "create":
@@ -53,12 +54,12 @@ def handle_alpsys_bot(room, msg, sender):
         else:
             room.send_text("Unknown command {0}. Try !help for help.".format(cmd[1]))
         
-def display_help():
+def display_help(room):
     room.send_text("Poll Bot is running\nCommand:\n\tdate\tSend server time")
 
 
 def main():
-    client = MatrixClient("os.environ.get('BASE_URL')", token="os.environ.get('TOKEN')", user_id="os.environ.get('USER_ID')")
+    client = MatrixClient(os.environ.get('BASE_URL'), token=os.environ.get('TOKEN'), user_id=os.environ.get('USER_ID'))
 
     # try:
     #     client.login_with_password(username, password)
@@ -76,7 +77,7 @@ def main():
     #     sys.exit(3)
 
     try:
-        room = client.join_room("os.environ.get('ROOM_ID')")
+        room = client.join_room(os.environ.get('ROOM_ID'))
     except MatrixRequestError as e:
         print(e)
         if e.code == 400:
@@ -87,6 +88,7 @@ def main():
             sys.exit(12)
 
     room.add_listener(on_message)
+    print("Starting listener thread, bot ready")
     client.start_listener_thread()
 
     while True:
