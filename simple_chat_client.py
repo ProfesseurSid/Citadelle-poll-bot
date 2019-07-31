@@ -35,13 +35,13 @@ def handle_alpsys_bot(room, msg, sender):
             room.send_text("Current server time: %s" % datetime.datetime.now())
         elif cmd[1] == "create":
             if len(cmd) >= 3:
-                ,pollname = msg.split("create ",1)
+                trash,pollname = msg.split("create ",1)
                 room.send_text("Create {0} poll attempt : Work in progress...".format(pollname))
             else:
                 room.send_text("No poll name given. Anonymous polls will be handled in later versions.")
         elif cmd[1] == "vote":
             if len(cmd) >= 3:
-                ,vote = msg.split("vote ",1)
+                trash,vote = msg.split("vote ",1)
                 if vote == "yes":
                     room.send_text("Yes vote attempt : Work in progress...")
                 elif vote == "no":
