@@ -18,7 +18,7 @@ def on_message(room, event):
     elif event['type'] == "m.room.message":
         if event['content']['msgtype'] == "m.text":
             print("{0}: {1}".format(event['sender'], event['content']['body']))
-            if event['content']['body'].startswith( "!alpsys" ):
+            if event['content']['body'].startswith( "!poll" ):
                 handle_alpsys_bot(room, event['content']['body'])
     else:
         print(event['type'])
@@ -27,7 +27,7 @@ def on_message(room, event):
 def handle_alpsys_bot(room, msg):
     cmd = msg.split()
     if len(cmd) == 1 or cmd[1] == "help":
-        room.send_text("Alpsys Bot is running\nCommand:\n\tdate\tSend server time")
+        room.send_text("Poll Bot is running\nCommand:\n\tdate\tSend server time")
     elif cmd[1] == "date":
         room.send_text("Current server time: %s" % datetime.datetime.now())
     elif cmd[1] == "status":
