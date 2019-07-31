@@ -1,10 +1,10 @@
 # Citadel-poll-bot
 Attempt for a Citadel bot managing polls
 
-# Documentation source
+# API Documentation source
 https://matrix.org/docs/spec/client_server/latest
 
-# Basics
+# Basics (API)
 ## Variables
 In the next examples, here are the needed env variables :
 - **$CITADEL**: the Citadel server's name or IP.
