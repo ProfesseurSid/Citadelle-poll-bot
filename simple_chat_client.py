@@ -58,7 +58,7 @@ def display_help():
 
 
 def main():
-    client = MatrixClient("$BASE_URL", token="$TOKEN", user_id="$USER_ID")
+    client = MatrixClient("os.environ.get('BASE_URL')", token="os.environ.get('TOKEN')", user_id="os.environ.get('USER_ID')")
 
     # try:
     #     client.login_with_password(username, password)
@@ -76,7 +76,7 @@ def main():
     #     sys.exit(3)
 
     try:
-        room = client.join_room("$ROOM_ID")
+        room = client.join_room("os.environ.get('ROOM_ID')")
     except MatrixRequestError as e:
         print(e)
         if e.code == 400:
