@@ -19,19 +19,42 @@ def on_message(room, event):
         if event['content']['msgtype'] == "m.text":
             print("{0}: {1}".format(event['sender'], event['content']['body']))
             if event['content']['body'].startswith( "!poll" ):
-                handle_alpsys_bot(room, event['content']['body'])
+                handle_alpsys_bot(room, event['content']['body'], event['sender'])
     else:
         print(event['type'])
 
 
-def handle_alpsys_bot(room, msg):
+def handle_alpsys_bot(room, msg, sender):
     cmd = msg.split()
-    if len(cmd) == 1 or cmd[1] == "help":
-        room.send_text("Poll Bot is running\nCommand:\n\tdate\tSend server time")
-    elif cmd[1] == "date":
-        room.send_text("Current server time: %s" % datetime.datetime.now())
-    elif cmd[1] == "status":
-        room.send_text("Work in progress...")
+    if len(cmd) <= 1:
+        display_help()
+    else:
+        if cmd[1] == "help":
+            display_help()
+        elif cmd[1] == "date":
+            room.send_text("Current server time: %s" % datetime.datetime.now())
+        elif cmd[1] == "create":
+            if len(cmd) >= 3:
+                ,pollname = msg.split("create ",1)
+                room.send_text("Create {0} poll attempt : Work in progress...".format(pollname))
+            else:
+                room.send_text("No poll name given. Anonymous polls will be handled in later versions.")
+        elif cmd[1] == "vote":
+            if len(cmd) >= 3:
+                ,vote = msg.split("vote ",1)
+                if vote == "yes":
+                    room.send_text("Yes vote attempt : Work in progress...")
+                elif vote == "no":
+                    room.send_text("No vote attempt : Work in progress...")
+                else:
+                    room.send_text("{0} not understood. Please use yes or no.".format(vote))
+            else:
+                room.send_text("No vote value given.")
+        else:
+            room.send_text("Unknown command {0}. Try !help for help.".format(cmd[1]))
+        
+def display_help():
+    room.send_text("Poll Bot is running\nCommand:\n\tdate\tSend server time")
 
 
 def main():
