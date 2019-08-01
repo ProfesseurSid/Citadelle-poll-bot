@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# coding: utf-8
+from __future__ import unicode_literals
 
 import sys
 import os
@@ -10,6 +12,8 @@ from matrix_client.client import MatrixClient
 from matrix_client.api import MatrixRequestError
 from requests.exceptions import MissingSchema
 
+sondages = {}
+pollname = ""
 
 # Called when a message is recieved.
 def on_message(room, event):
@@ -26,36 +30,89 @@ def on_message(room, event):
 
 
 def handle_alpsys_bot(room, msg, sender):
+    global sondages
+    global pollname
     cmd = msg.split()
     if len(cmd) <= 1:
         display_help(room)
     else:
-        if cmd[1] == "help":
+        #ASKING 4 HELP#
+        if cmd[1].lower() == "help":
             display_help(room)
-        elif cmd[1] == "date":
+            
+        #ASKING 4 DATE#
+        elif cmd[1].lower() == "date":
             room.send_text("Current server time: %s" % datetime.datetime.now())
-        elif cmd[1] == "create":
-            if len(cmd) >= 3:
+
+        #POLL CREATION#
+        elif cmd[1].lower() == "create":
+            #For now, only 1 poll is handled#
+            if sondages and len(sondages) > 0:
+                room.send_text("Poll \"{0}\" currently open. Multi-polls will be handled in later versions.".format(pollname))
+
+            #Named poll#
+            elif len(cmd) >= 3:
                 trash,pollname = msg.split("create ",1)
-                room.send_text("Create {0} poll attempt : Work in progress...".format(pollname))
+                sondages["name"] = pollname
+                sondages["{0}".format(pollname)] = {}
+                room.send_text("Poll \"{0}\" created.".format(pollname))
+
+            #Anonymous poll#
             else:
                 room.send_text("No poll name given. Anonymous polls will be handled in later versions.")
-        elif cmd[1] == "vote":
-            if len(cmd) >= 3:
+
+        #VOTES#
+        elif cmd[1].lower() == "vote":
+            if not sondages or len(sondages) == 0:
+                room.send_text("No poll created...")
+            elif len(cmd) >= 3:
                 trash,vote = msg.split("vote ",1)
-                if vote == "yes":
-                    room.send_text("Yes vote attempt : Work in progress...")
-                elif vote == "no":
-                    room.send_text("No vote attempt : Work in progress...")
+
+                #Yes#
+                if vote.lower() == "yes":
+                    sondages[pollname][sender] = 1
+                    results=count(sondages[pollname])
+                    room.send_text("Poll {0}:\nScores are now {1} for, {2} against.".format(pollname, results["yes"], results["no"]))
+
+                #No#
+                elif vote.lower() == "no":
+                    sondages[pollname][sender] = 0
+                    results=count(sondages[pollname])
+                    room.send_text("Scores are now {1} for, {2} against.".format(pollname, results["yes"], results["no"]))
+
+                #Unknown#
                 else:
                     room.send_text("{0} not understood. Please use yes or no.".format(vote))
             else:
                 room.send_text("No vote value given.")
+
+        #ASKING 4 SCORES#
+        elif cmd[1].lower() == "score" or cmd[1].lower() == "scores":
+            if not sondages or len(sondages) == 0:
+                room.send_text("No poll created...")
+            results=count(sondages[pollname])
+            room.send_text("Scores for \"{0}\" poll:\nScores are {1} for, {2} against.".format(pollname, results["yes"], results["no"]))
+
+        #POLL CLOSING#
+        elif cmd[1].lower() == "close":
+            results=count(sondages[pollname])
+            room.send_text("Closing \"{0}\" poll.\nResults are {1} for, {2} against.".format(pollname, results["yes"], results["no"]))
+            sondages={}
         else:
-            room.send_text("Unknown command {0}. Try !help for help.".format(cmd[1]))
+            room.send_text("Unknown command {0}. Try \"!poll help\" for help.".format(cmd[1]))
         
+def count(sondage):
+    yes=0
+    no=0
+    
+    for user in sondage:
+        yes += sondage[user]
+        no += (1+sondage[user]) % 2
+
+    return {"yes":yes,"no":no}
+
 def display_help(room):
-    room.send_text("Poll Bot is running\nCommand:\n\tdate\tSend server time")
+    room.send_text("Poll Bot is running\nCommand:\n\tclose\t\t\t\tClose current poll and display results\n\tcreate <pollname>\tCreate the poll\n\tdate\t\t\t\tSend server time\n\thelp\t\t\t\tDisplays this help\n\tscore\t\t\t\tDisplay scores of current poll\n\tvote <yes/no>\t\tVote for current poll")
 
 
 def main():
