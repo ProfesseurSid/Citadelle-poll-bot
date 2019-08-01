@@ -8,12 +8,20 @@ import samples_common  # Common bits used between samples
 import logging
 import datetime
 
+from markdown2 import Markdown
+
 from matrix_client.client import MatrixClient
+from matrix_client.room import Room
 from matrix_client.api import MatrixRequestError
 from requests.exceptions import MissingSchema
 
 sondages = {}
 pollname = ""
+
+def send_markdown(self, text):
+    self.send_html(Markdown().convert(text))
+
+setattr(Room, 'send_markdown', send_markdown)
 
 # Called when a message is recieved.
 def on_message(room, event):
@@ -48,14 +56,14 @@ def handle_alpsys_bot(room, msg, sender):
         elif cmd[1].lower() == "create":
             #For now, only 1 poll is handled#
             if sondages and len(sondages) > 0:
-                room.send_text("Poll \"{0}\" currently open. Multi-polls will be handled in later versions.".format(pollname))
+                room.send_markdown("Poll **{0}** currently open. Multi-polls will be handled in later versions.".format(pollname))
 
             #Named poll#
             elif len(cmd) >= 3:
                 trash,pollname = msg.split("create ",1)
                 sondages["name"] = pollname
                 sondages["{0}".format(pollname)] = {}
-                room.send_text("Poll \"{0}\" created.".format(pollname))
+                room.send_markdown("Poll **{0}** created.".format(pollname))
 
             #Anonymous poll#
             else:
@@ -72,7 +80,7 @@ def handle_alpsys_bot(room, msg, sender):
                 if vote.lower() == "yes":
                     sondages[pollname][sender] = 1
                     results=count(sondages[pollname])
-                    room.send_text("Poll {0}:\nScores are now {1} for, {2} against.".format(pollname, results["yes"], results["no"]))
+                    room.send_markdown("Poll **{0}**:\nScores are now {1} for, {2} against.".format(pollname, results["yes"], results["no"]))
 
                 #No#
                 elif vote.lower() == "no":
@@ -91,12 +99,12 @@ def handle_alpsys_bot(room, msg, sender):
             if not sondages or len(sondages) == 0:
                 room.send_text("No poll created...")
             results=count(sondages[pollname])
-            room.send_text("Scores for \"{0}\" poll:\nScores are {1} for, {2} against.".format(pollname, results["yes"], results["no"]))
+            room.send_markdown("Scores for **{0}** poll:\nScores are {1} for, {2} against.".format(pollname, results["yes"], results["no"]))
 
         #POLL CLOSING#
         elif cmd[1].lower() == "close":
             results=count(sondages[pollname])
-            room.send_text("Closing \"{0}\" poll.\nResults are {1} for, {2} against.".format(pollname, results["yes"], results["no"]))
+            room.send_markdown("Closing **{0}** poll.\nResults are {1} for, {2} against.".format(pollname, results["yes"], results["no"]))
             sondages={}
         else:
             room.send_text("Unknown command {0}. Try \"!poll help\" for help.".format(cmd[1]))
