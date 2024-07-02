@@ -9,10 +9,11 @@ import logging
 import datetime
 
 from markdown2 import Markdown
+from getpass import getpass
 
 from matrix_client.client import MatrixClient
 from matrix_client.room import Room
-from matrix_client.api import MatrixRequestError
+from matrix_client.api import MatrixHttpApi, MatrixRequestError
 from requests.exceptions import MissingSchema
 
 sondages = {}
@@ -30,7 +31,7 @@ def on_message(room, event):
             print("{0} joined".format(event['content']['displayname']))
     elif event['type'] == "m.room.message":
         if event['content']['msgtype'] == "m.text":
-            print("{0}: {1}".format(event['sender'], event['content']['body']))
+            print("{0}: {1}".format(event['sender'], event['content']['body'].encode('ascii', 'ignore')))
             if event['content']['body'].startswith( "!poll" ):
                 handle_alpsys_bot(room, event['content']['body'], event['sender'])
     else:
@@ -123,7 +124,7 @@ def display_help(room):
     room.send_text("Poll Bot is running\nCommand:\n\tclose\t\t\t\tClose current poll and display results\n\tcreate <pollname>\tCreate the poll\n\tdate\t\t\t\tSend server time\n\thelp\t\t\t\tDisplays this help\n\tscore\t\t\t\tDisplay scores of current poll\n\tvote <yes/no>\t\tVote for current poll")
 
 
-def main():
+def old_main():
     client = MatrixClient(os.environ.get('BASE_URL'), token=os.environ.get('TOKEN'), user_id=os.environ.get('USER_ID'))
 
     # try:
@@ -164,13 +165,48 @@ def main():
             room.send_text(msg)
 
 
+def main():
+    global client
+    global matrix
+    global room_id
+
+    room_id = os.environ.get('ROOM')
+    bot_pwd=os.environ.get('BOT_PWD')
+    bot_user=os.environ.get('BOT_USER')
+    citadel_url=os.environ.get('CITADEL_URL');
+
+    if bot_pwd is None:
+        bot_pwd=getpass(prompt='Bot ('+bot_user+') password : ')
+
+    client = MatrixClient(citadel_url)
+    mxtoken = client.login(username=bot_user,password=bot_pwd)
+    matrix = MatrixHttpApi(citadel_url, mxtoken)
+
+    try:
+        room = client.join_room(room_id)
+    except MatrixRequestError as e:
+        print(e)
+        if e.code == 400:
+            print("Room ID/Alias in the wrong format")
+            sys.exit(11)
+        else:
+            print("Couldn't find room.")
+            sys.exit(12)
+
+    room.add_listener(on_message)
+    print("Starting listener thread, bot ready")
+    client.start_listener_thread()
+
+    while True:
+        msg = samples_common.get_input()
+        if msg == "/quit":
+            break
+        else:
+            room.send_text(msg)
+
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.WARNING)
-    # host, username, password = samples_common.get_user_details(sys.argv)
-
-    # if len(sys.argv) > 4:
-    #     room_id_alias = sys.argv[4]
-    # else:
-    #     room_id_alias = samples_common.get_input("Room ID/Alias: ")
 
     main()
+
