@@ -19,6 +19,8 @@ from matrix_client.room import Room
 from matrix_client.api import MatrixHttpApi, MatrixRequestError
 from requests.exceptions import MissingSchema
 
+from random import randrange
+
 request_prefix = "!giphy "
 client = ""
 matrix = ""
@@ -59,15 +61,16 @@ def handle_alpsys_bot(room, query, sender):
         display_help()
     else:
         url = "http://api.giphy.com/v1/gifs/search"
+        count = 5
         params = parse.urlencode({
           "q": query,
           "api_key": api_key,
-          "limit": "1"
+          "limit": count
         })
 
         with request.urlopen("".join((url, "?", params))) as response:
             data = json.loads(response.read())
-            gifurl = data["data"][0]["images"]["original"]["url"]
+            gifurl = data["data"][randrange(0, len(data["data"])-1)]["images"]["original"]["url"]
         
             with request.urlopen(gifurl) as gifBytes:
                 mxurl = client.upload(gifBytes.read(),'image/gif')
